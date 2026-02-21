@@ -15,7 +15,7 @@ The repository is organized by **domain first**, then by **implementation method
 ```
 modern-analytics-platforms/
 │
-├── workforce-analytics/
+├── workforce/
 │   ├── databricks-native/        → SQL-first ELT on Azure Databricks
 │   ├── databricks-dbt/           → dbt models, tests, and snapshots (future)
 │   ├── databricks-genie/         → Genie semantic layer definitions (future)
