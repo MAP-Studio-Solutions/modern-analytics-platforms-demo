@@ -1,5 +1,5 @@
 [project]
-name = "workforce_analytics"
+name = "workforce"
 version = "0.1.0"
 description = "Azure Databricks Workforce Analytics Platform (synthetic data) - repo scaffold"
 requires-python = ">=3.10"

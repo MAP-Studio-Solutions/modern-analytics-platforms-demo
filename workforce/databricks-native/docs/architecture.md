@@ -9,11 +9,11 @@ Landing (raw files in ADLS/DBFS)
     → Silver Delta tables (clean/typed/deduped; incremental)
       → Gold (dimensional models + facts)
 
-## Storage Paths (suggested)
-- `LANDING_PATH`: `abfss://<container>@<account>.dfs.core.windows.net/landing`
-- `BRONZE_PATH`:  `.../bronze`
-- `SILVER_PATH`:  `.../silver`
-- `GOLD_PATH`:    `.../gold`
+## Storage Paths (actual)
+- `LANDING_PATH`: `abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforce/landing`
+- `BRONZE_PATH`:  `abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforce/bronze`
+- `SILVER_PATH`:  `abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforce/silver`
+- `GOLD_PATH`:    `abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforce/gold`
 
 ## Orchestration
 Databricks Workflows:
