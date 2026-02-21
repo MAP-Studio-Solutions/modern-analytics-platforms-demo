@@ -33,7 +33,7 @@ The implementation emphasizes pragmatic system design under real-world constrain
 - Orchestration via Databricks Workflows
 - Governed, point-in-time datasets
 
-AI-assisted development is used internally for scaffolding and documentation acceleration.  
+AI-assisted development is used internally to accelerate scaffolding and documentation.  
 All pipelines remain deterministic, testable, and auditable.
 
 ---
@@ -137,7 +137,7 @@ flowchart TD
 
 ## Separation of Concerns
 
-- **GitHub / Databricks Repos**  
+- **GitHub/Databricks Repos**  
   Code only: Python, SQL, notebooks, workflows, documentation
 
 - **ADLS Gen2**  
@@ -199,7 +199,8 @@ This project intentionally avoids unnecessary abstraction and focuses on:
 
 The goal is not novelty — it is **durability and clarity**.
 
-### Why Atomic Rename Matters
+### Atomic Rename and Why It Matters
+
 
 Modern analytics engines (Spark, Databricks, Delta Lake) publish datasets using a **write-then-rename** pattern:
 
@@ -222,13 +223,13 @@ Flat blob storage does not provide this guarantee and can expose partial results
 
 ```mermaid
 flowchart LR
-    W["Spark / Databricks Job"] --> T["Write data files<br/>(temp location)"]
+    W["Spark/Databricks Job"] --> T["Write data files<br/>(temp location)"]
     T --> L["Write Delta commit intent<br/>_delta_log/00000.json"]
     L --> R["Atomic commit (rename / publish)"]
     R --> V["New table version visible<br/>(N → N+1)"]
     V --> Q["Readers see consistent snapshot<br/>(old OR new)"]
 
-    %% Failure / retry path
+    %% Failure/retry path
     T -->|failure| F["Job fails before commit"]
     L -->|failure| F
     F --> X["Temp files remain orphaned<br/>(not referenced by _delta_log)"]
@@ -245,7 +246,7 @@ flowchart LR
 
 ---
 
-## Why This Architecture Matters
+## Architecture Rationale
 
 This project is intentionally designed to reflect the constraints and realities of enterprise analytics engineering.  
 The architecture prioritizes durability, clarity, and correctness over novelty.
