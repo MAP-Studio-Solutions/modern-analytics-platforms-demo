@@ -1,169 +1,120 @@
-# Workforce Analytics — Databricks‑Native Method
+# Workforce Analytics — Domain Overview
 
-This folder contains the **Databricks‑native, SQL‑first implementation** of the Workforce Analytics domain.  
-It demonstrates how this domain is executed using:
+The Workforce Analytics domain models the core entities, events, and historical changes that describe an organization’s employees over time.  
+It provides a governed, point‑in‑time view of the workforce suitable for reporting, BI consumption, and downstream analytics.
 
-- metadata‑driven ingestion  
-- medallion architecture  
-- SQL transformations  
-- SCD Type 2 modeling  
-- point‑in‑time reconstruction  
-- Databricks Workflows orchestration  
-
-This README explains:
-
-- What documents exist  
-- Which ones are actually used at runtime  
-- How the execution architecture works  
-- How data flows from raw → bronze → silver → gold  
+This README describes the **business domain**, **data model**, and **analytical outputs**.  
+Execution details are defined separately in each method folder.
 
 ---
 
-## 1. Repository Layout (Method‑Specific)
+## Domain Purpose
 
-```
-workforce/
-  databricks-native/
-    README.md                ← You are here
-    sql/
-      bronze/                ← Raw → bronze ingestion SQL
-      silver/                ← SCD2 + PIT logic
-      gold/                  ← Dimensional + reporting models
-  ingestion/
-    config/
-      sources.yaml           ← Runtime metadata input
-    python/workforce_ingest/
-      config.py              ← Loads YAML → SourceSpec
-      runner.py              ← Executes ingestion
-      transformations/       ← Python helpers (optional)
-  docs/                      ← Human documentation (not executed)
-```
+The Workforce domain answers foundational questions about an organization’s people:
+
+- How many employees do we have today?
+- How has headcount changed over time?
+- Which departments are growing or shrinking?
+- What events (hire, termination, transfer, promotion) drive those changes?
+- What is the historical composition of the workforce at any point in time?
+
+The domain is intentionally small but representative of real enterprise workforce systems.
 
 ---
 
-## 2. What Documents Are Actually Used at Runtime
+## Domain Entities
 
-| Document | Used By | Purpose |
-|---------|---------|---------|
-| `sources.yaml` | Python ingestion | Defines landing paths, formats, bronze/silver tables, keys |
-| `config.py` | Python ingestion | Converts YAML → typed `SourceSpec` objects |
-| `runner.py` | Databricks job | Executes ingestion for each source |
-| `sql/bronze/*.sql` | Databricks SQL engine | Load raw → bronze |
-| `sql/silver/*.sql` | Databricks SQL engine | SCD2 + PIT logic |
-| `sql/gold/*.sql` | Databricks SQL engine | Final dimensional models |
-| `docs/*.md` | Humans only | Architecture, modeling, explanations |
+### **Employee**
+The central entity representing a worker in the organization.  
+Attributes include:
 
-Everything else is scaffolding.
+- employee_id  
+- name  
+- department  
+- job role  
+- manager  
+- employment status  
+- effective dates (for SCD2 history)
 
----
+### **Department**
+Organizational structure used for grouping and reporting.  
+Attributes include:
 
-## 3. Execution Architecture (Databricks‑Native)
+- department_id  
+- department_name  
+- parent_department (optional)
 
-This method uses **SQL‑first ELT** orchestrated by Databricks Workflows.
+### **Job**
+Represents the employee’s role or position.  
+Attributes include:
 
-### High‑Level Flow
-
-```
-sources.yaml
-    ↓
-config.py → SourceSpec objects
-    ↓
-runner.py (Databricks job)
-    ↓
-Bronze SQL (raw → bronze)
-    ↓
-Silver SQL (SCD2 + PIT)
-    ↓
-Gold SQL (dimensional models)
-```
+- job_id  
+- job_title  
+- job_family  
+- job_level
 
 ---
 
-## 4. Detailed Flow Diagram
+## Domain Events
 
-### 1. Metadata Loading
+The domain models key workforce events that change the composition of the organization:
 
-```
-sources.yaml
-   └── defines:
-         - format
-         - landing_relpath
-         - bronze_table
-         - silver_table
-         - keys
-```
+- **Hire**  
+- **Termination**  
+- **Transfer**  
+- **Promotion**  
+- **Compensation change**  
 
-### 2. Python Ingestion Layer
-
-```
-config.py
-   └── load_sources_yaml()
-         └── creates dict[str, SourceSpec]
-
-runner.py
-   └── for each source in SOURCES:
-         └── executes bronze SQL
-```
-
-### 3. SQL Transformation Layer
-
-```
-Bronze Layer
-   └── Ingest raw files
-   └── Apply schema normalization
-   └── Write bronze tables
-
-Silver Layer
-   └── SCD Type 2 logic
-   └── Point-in-time reconstruction
-   └── Surrogate keys
-
-Gold Layer
-   └── Dimensional models
-   └── Fact tables
-   └── Reporting views
-```
+These events feed both SCD2 history and point‑in‑time headcount reconstruction.
 
 ---
 
-## 5. Document Explanations
+## Gold‑Layer Data Model
 
-### `sources.yaml` (runtime input)  
-Defines each dataset’s ingestion metadata.  
-This is the *only* document that drives ingestion behavior.
+The Workforce domain produces a small but durable dimensional model.
 
-### `config.py`  
-Loads YAML → creates immutable `SourceSpec` objects.
+### **Dimensions**
 
-### `runner.py`  
-Loops through all sources and executes bronze ingestion SQL.
+#### `dim_employee` (SCD Type 2)
+Tracks employee attributes over time using effective‑date logic.  
+Supports point‑in‑time reporting and historical reconstruction.
 
-### `sql/bronze/*.sql`  
-Implements raw → bronze ingestion using COPY INTO or MERGE.
+#### `dim_date`
+Standard calendar dimension used for time‑series alignment.
 
-### `sql/silver/*.sql`  
-Implements SCD2 and PIT logic.
+### **Facts**
 
-### `sql/gold/*.sql`  
-Implements dimensional models and reporting tables.
+#### `fact_employee_events`
+A conformed event table representing hires, terminations, transfers, promotions, and compensation changes.
 
-### `docs/*.md`  
-Human‑readable explanations.  
-Not used by code.
+#### `fact_headcount_snapshot`
+A point‑in‑time table that reconstructs workforce composition for any historical date.
 
 ---
 
-## 6. Why This README Matters
+## Modeling Patterns
 
-Each **method** (Databricks‑native, dbt, Genie) has a different execution architecture:
+The Workforce domain uses:
 
-- Databricks‑native → SQL‑first, orchestrated by Workflows  
-- dbt → model‑first, orchestrated by dbt DAG  
-- Genie → semantic‑layer‑first, AI‑assisted querying  
+- **SCD Type 2** for employee history  
+- **Point‑in‑time reconstruction** for headcount  
+- **Surrogate keys** for dimensional stability  
+- **Effective‑date logic** for historical accuracy  
+- **Event‑driven modeling** for workforce changes  
 
-This README ensures each workflow method for a domain explains:
+These patterns mirror real enterprise workforce analytics systems.
 
-- What is executed  
-- What is configuration  
-- What is documentation  
-- How the flow works end‑to‑end  
+---
+
+## How This Domain Relates to Methods
+
+This domain can be implemented using multiple execution methods:
+
+- **Databricks‑Native** (SQL‑first ELT)
+- **dbt‑Databricks** (model‑first DAG)
+- **Genie** (semantic‑layer‑first AI querying)
+
+Each method produces or consumes the **same gold‑layer model**, but uses a different execution approach.
+
+See the method folders for implementation details.
+
