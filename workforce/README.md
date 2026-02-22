@@ -167,7 +167,3 @@ This README ensures each workflow method for a domain explains:
 - What is configuration  
 - What is documentation  
 - How the flow works end‑to‑end  
-
-So when someone opens the folder, they immediately understand:
-
-**“How does this method actually run?”**
