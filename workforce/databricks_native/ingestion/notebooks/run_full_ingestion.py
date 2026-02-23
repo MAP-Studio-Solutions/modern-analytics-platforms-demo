@@ -33,11 +33,19 @@ SOURCES_YAML = "/Workspace/Repos/.../workforce/databricks-native/ingestion/sourc
 # COMMAND ----------
 # Generate synthetic data into /tmp (local to the cluster)
 
-subprocess.run([
-    "python",
-    "/Workspace/Repos/.../workforce/databricks-native/ingestion/scripts/generate_synth_data.py",
-    "--out", LOCAL_SYNTH_DATA
-], check=True)
+script_path = os.path.join(
+    repo_root,
+    "workforce",
+    "databricks_native",
+    "ingestion",
+    "scripts",
+    "generate_synth_data.py"
+)
+
+subprocess.run(
+    ["python", script_path, "--out", LOCAL_SYNTH_DATA],
+    check=True
+)
 
 # COMMAND ----------
 # Upload synthetic data → ADLS landing
