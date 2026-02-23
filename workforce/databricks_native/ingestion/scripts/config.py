@@ -13,6 +13,10 @@ class SourceSpec:
     keys: list[str]
 
 def load_sources_yaml(path: str | Path) -> dict[str, SourceSpec]:
+    """ 
+    Load source metadata from a YAML file and return a dictionary 
+    of SourceSpec objects keyed by source name. 
+    """   
     p = Path(path)
     data = yaml.safe_load(p.read_text(encoding="utf-8"))
     out: dict[str, SourceSpec] = {}

@@ -15,10 +15,9 @@ if repo_root not in sys.path:
 
 # COMMAND ----------
 # Imports and path configuration
-
 from workforce.databricks_native.ingestion.scripts.upload_to_landing import upload_to_landing
 from workforce.databricks_native.ingestion.scripts.runner import run_ingestion
-import subprocess
+from workforce.databricks_native.ingestion.scripts.generate_synth_data import generate_synth_data
 
 # Local temp directory for synthetic data
 LOCAL_SYNTH_DATA = "/tmp/workforce_synth"
@@ -28,36 +27,21 @@ LANDING_PATH = "abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforc
 BRONZE_PATH  = "abfss://analytics@stanalyticsdl001.dfs.core.windows.net/workforce/bronze"
 
 # Path to metadata
-SOURCES_YAML = "/Workspace/Repos/.../workforce/databricks-native/ingestion/sources.yaml"
+SOURCES_YAML = f"{repo_root}/workforce/databricks_native/ingestion/sources.yaml"
 
 # COMMAND ----------
 # Generate synthetic data into /tmp (local to the cluster)
-
-script_path = os.path.join(
-    repo_root,
-    "workforce",
-    "databricks_native",
-    "ingestion",
-    "scripts",
-    "generate_synth_data.py"
-)
-
-subprocess.run(
-    ["python", script_path, "--out", LOCAL_SYNTH_DATA],
-    check=True
-)
+generate_synth_data(LOCAL_SYNTH_DATA)
 
 # COMMAND ----------
 # Upload synthetic data → ADLS landing
-
 upload_to_landing(
-    local_path=LOCAL_SYNTH_DATA,
-    landing_path=LANDING_PATH
+    local_root=LOCAL_SYNTH_DATA,
+    landing_root=LANDING_PATH
 )
 
 # COMMAND ----------
 # Run bronze ingestion
-
 run_ingestion(
     sources_yaml=SOURCES_YAML,
     landing_path=LANDING_PATH,

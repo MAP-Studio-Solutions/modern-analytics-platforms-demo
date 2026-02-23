@@ -1,17 +1,20 @@
 from __future__ import annotations
-from pathlib import Path
 from pyspark.sql import SparkSession
 
 from .config import load_sources_yaml
 from workforce.databricks_native.transformations.bronze.bronze_ingest import ingest_to_bronze
 
-# Databricks-side runner (skeleton).
-# Implement inside Databricks with Spark and write bronze Delta tables (append-only).
 
-from pathlib import Path
-from .config import load_sources_yaml
+def run_ingestion(
+    sources_yaml: str,
+    landing_path: str,
+    bronze_path: str
+) -> None:
+    """
+    Databricks-side ingestion runner.
+    Loads source specs from YAML and ingests each source into bronze.
+    """
 
-def run_ingestion(sources_yaml: str, landing_path: str) -> None:
     spark = SparkSession.builder.getOrCreate()
 
     sources = load_sources_yaml(sources_yaml)
@@ -19,4 +22,9 @@ def run_ingestion(sources_yaml: str, landing_path: str) -> None:
 
     for spec in sources.values():
         print(f"Ingesting {spec.name}...")
-        ingest_to_bronze(spark, landing_path, bronze_path, spec)
+        ingest_to_bronze(
+            spark=spark,
+            landing_path=landing_path,
+            bronze_path=bronze_path,
+            spec=spec
+        )
