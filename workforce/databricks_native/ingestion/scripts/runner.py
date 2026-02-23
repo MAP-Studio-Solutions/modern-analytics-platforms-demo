@@ -3,7 +3,7 @@ from pathlib import Path
 from pyspark.sql import SparkSession
 
 from .config import load_sources_yaml
-from .bronze_ingest import ingest_to_bronze
+from workforce.databricks_native.transformations.bronze.bronze_ingest import ingest_to_bronze
 
 # Databricks-side runner (skeleton).
 # Implement inside Databricks with Spark and write bronze Delta tables (append-only).
