@@ -131,7 +131,7 @@ Hierarchical namespace is **required** for reliable Delta Lake pipelines.
 
 ## System Architecture Diagram
 
-```Mermaid
+```mermaid
     flowchart TD
         subgraph Azure_Subscription["Azure Subscription"]
             SA["Storage Account<br/>(ADLS Gen2 Enabled)"]
