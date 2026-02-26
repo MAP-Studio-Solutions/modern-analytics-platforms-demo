@@ -1,0 +1,3 @@
+on-run-start:
+  - "{{ log('Auto-generating dbt sources from ingestion YAML...', info=True) }}"
+  - "!python transformation_engine/scripts/generate_dbt_sources.py"
